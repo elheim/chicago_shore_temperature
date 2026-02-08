@@ -85,7 +85,14 @@ def send_telegram(text: str) -> bool:
     }
     try:
         r = requests.post(url, json=payload, timeout=10)
-        r.raise_for_status()
+        if not r.ok:
+            try:
+                err = r.json()
+                msg = err.get("description", r.text)
+                log.error("Telegram API error: %s", msg)
+            except Exception:
+                log.error("Failed to send Telegram: %s %s", r.status_code, r.text)
+            return False
         log.info("Telegram message sent")
         return True
     except requests.RequestException as e:
