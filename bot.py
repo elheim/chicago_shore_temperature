@@ -45,39 +45,67 @@ PORT = int(os.getenv("PORT", "8443"))
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handle /start — welcome message."""
+    user = update.effective_user
+    name = user.first_name if user else "there"
     await update.message.reply_text(
-        "Hey! I'm the Chicago Shore Temperature Bot.\n\n"
-        "Send /temp to get the current Lake Michigan water temperature.\n"
-        "Send /help to see all commands."
+        f"Hey {name}! \U0001F30A\n\n"
+        "I check the Lake Michigan water temperature "
+        "at Chicago Shore in real time.\n\n"
+        "\U0001F321 /temp — current water temperature\n"
+        "\u2753 /help — see all commands\n\n"
+        "Data source: NOAA Open Lake Michigan Report"
     )
 
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handle /help — list available commands."""
     await update.message.reply_text(
-        "Available commands:\n\n"
-        "/temp  — Get the current Chicago Shore water temperature\n"
-        "/help  — Show this help message"
+        "\U0001F4CB Commands\n\n"
+        "\U0001F321 /temp — current water temperature\n"
+        "\u2753 /help — this message\n\n"
+        "Tip: tap the \u2295 button to see the command menu."
     )
 
 
 async def temp_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handle /temp — fetch and reply with current water temperature."""
-    await update.message.reply_text("Fetching temperature...")
+    await update.message.reply_text("\U0001F50D Checking NOAA...")
 
     temp = fetch_chicago_shore_temp()
 
     if temp is None:
         await update.message.reply_text(
-            "Sorry, I couldn't fetch the temperature right now. "
-            "NOAA might be down or the report isn't available. Try again later."
+            "\u26A0\uFE0F Couldn't fetch the temperature right now.\n"
+            "NOAA may be updating the report. Try again in a few minutes."
         )
         return
 
-    if temp > 50:
-        msg = f"Chicago Shore water temp: {temp}°F — good time for the lake!"
+    # Convert to Celsius for the international crowd
+    temp_c = round((temp - 32) * 5 / 9)
+
+    # Pick a vibe based on the temp
+    if temp >= 70:
+        icon = "\U0001F525"
+        vibe = "Perfect beach day!"
+    elif temp >= 60:
+        icon = "\u2600\uFE0F"
+        vibe = "Great for the lake."
+    elif temp >= 50:
+        icon = "\U0001F324\uFE0F"
+        vibe = "A bit cool — wetsuits recommended."
+    elif temp >= 40:
+        icon = "\U0001F976"
+        vibe = "Cold. For brave swimmers only."
     else:
-        msg = f"Chicago Shore water temp: {temp}°F — bit chilly for swimming."
+        icon = "\u2744\uFE0F"
+        vibe = "Way too cold. Stay on the shore."
+
+    msg = (
+        f"{icon} Chicago Shore\n\n"
+        f"\U0001F321 {temp}°F / {temp_c}°C\n"
+        f"\U0001F30A {vibe}\n\n"
+        f"\U0001F4CD Lake Michigan — NOAA OMR Report"
+    )
 
     await update.message.reply_text(msg)
 
@@ -85,15 +113,15 @@ async def temp_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 async def unknown_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handle any non-command message."""
     await update.message.reply_text(
-        "Send /temp to get the Chicago Shore water temperature."
+        "Tap /temp to get the current water temperature \U0001F30A"
     )
 
 
 async def post_init(application: Application) -> None:
     """Set the bot's command menu in Telegram (the '/' button)."""
     await application.bot.set_my_commands([
-        BotCommand("temp", "Get current water temperature"),
-        BotCommand("help", "Show available commands"),
+        BotCommand("temp", "\U0001F321 Current water temperature"),
+        BotCommand("help", "\u2753 Show available commands"),
     ])
 
 
