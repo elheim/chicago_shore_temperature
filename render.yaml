@@ -1,0 +1,12 @@
+# Render Blueprint — auto-configures the service when you connect the repo.
+# Docs: https://docs.render.com/blueprint-spec
+services:
+  - type: web
+    name: chicago-shore-bot
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python bot.py
+    envVars:
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false          # you'll set this manually in the Render dashboard
