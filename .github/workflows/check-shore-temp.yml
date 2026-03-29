@@ -1,6 +1,4 @@
-# Runs daily at 8:00 AM CST (14:00 UTC); also runnable manually.
-name: Chicago Shore Temp
-
+# Runs daily at 8:00 AM CST (14:00 UTC). Sends weekly on Mondays; special alert if temp > 59°F.name: Chicago Shore Temp
 on:
   schedule:
     - cron: "0 14 * * *"
