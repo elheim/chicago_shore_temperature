@@ -6,6 +6,7 @@ Run daily (e.g. via cron or GitHub Actions) to get a daily message.
 FIXED: Now properly sends to multiple chat IDs!
 """
 import argparse
+import datetime
 import logging
 import os
 import re
@@ -168,35 +169,35 @@ def send_telegram(text: str) -> bool:
     return success_count > 0
 
 
-  def main() -> None:
-      temp = fetch_chicago_shore_temp()
-      if temp is None:
-          log.error("Could not parse Chicago shore temperature")
-          if TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID:
-              send_telegram("Chicago Shore: could not fetch temperature.")
-          return
+def main() -> None:
+    temp = fetch_chicago_shore_temp()
+    if temp is None:
+        log.error("Could not parse Chicago shore temperature")
+        if TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID:
+            send_telegram("Chicago Shore: could not fetch temperature.")
+        return
 
-      log.info("Chicago Shore temperature: %s°F", temp)
+    log.info("Chicago Shore temperature: %s°F", temp)
 
-      is_monday = datetime.datetime.now().weekday() == 0
+    is_monday = datetime.datetime.now().weekday() == 0
 
-      if temp > 59:
-          # Special alert any day temp crosses 59°F
-          temp_c = round((temp - 32) * 5 / 9)
-          msg = (
-              f"\U0001F525 Chicago Shore: {temp}°F / {temp_c}°C\n"
-              f"Lake is warming up — great for swimming!"
-          )
-          send_telegram(msg)
-      elif is_monday:
-          # Regular weekly update
-          if temp > 50:
-              msg = f"Chicago Shore water temp: {temp}\u00b0F \u2014 good time for the lake."
-          else:
-              msg = f"Chicago Shore water temp: {temp}\u00b0F"
-          send_telegram(msg)
-      else:
-          log.info("Skipping: not Monday and temp (%s\u00b0F) <= 59\u00b0F", temp)
+    if temp > 59:
+        # Special alert any day temp crosses 59°F
+        temp_c = round((temp - 32) * 5 / 9)
+        msg = (
+            f"\U0001F525 Chicago Shore: {temp}°F / {temp_c}°C\n"
+            f"Lake is warming up — great for swimming!"
+        )
+        send_telegram(msg)
+    elif is_monday:
+        # Regular weekly update
+        if temp > 50:
+            msg = f"Chicago Shore water temp: {temp}°F — good time for the lake."
+        else:
+            msg = f"Chicago Shore water temp: {temp}°F"
+        send_telegram(msg)
+    else:
+        log.info("Skipping: not Monday and temp (%s°F) <= 59°F", temp)
 
 
 if __name__ == "__main__":
