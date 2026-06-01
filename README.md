@@ -33,7 +33,7 @@ chicago_shore_temperature/
 python3 -m venv .venv
 source .venv/bin/activate   # Windows: .venv\Scripts\activate
 
-# 2. Install dependencies
+# 2. Install dependencies using pip 
 pip install -r requirements.txt
 
 # 3. Configure secrets
